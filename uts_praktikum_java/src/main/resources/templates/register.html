@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #6e7d9d, #2a2c39);
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px 0 0 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .form-group input[type="submit"] {
+            background-color: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+        }
+        /* CSS */
+		.form-group button[type="submit"] {
+		    background-color: #4CAF50;
+		    color: #fff;
+		    cursor: pointer;
+		    border: none;
+		    padding: 12px 24px; /* Sesuaikan ukuran padding sesuai dengan preferensi Anda */
+		    border-radius: 3px;
+		    font-size: 16px;
+		    transition: background-color 0.3s;
+		}
+		
+		.form-group button[type="submit"]:hover {
+		    background-color: #45a049;
+		}
+        
+
+        .form-group input[type="submit"]:hover {
+            background-color: #45a049;
+        }
+
+        .form-group input[type="submit"]:focus {
+            outline: none;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 14px;
+        }
+
+        .error-field {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Register</h2>
+        <form id="registration-form" action="/register" method="post">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="namaLengkap">Full Name:</label>
+                <input type="text" id="namaLengkap" name="namaLengkap" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="peran">Role:</label>
+                <input type="text" id="peran" name="peran" required>
+            </div>
+            <div class="form-group">
+                <label for="alamat">Address:</label>
+                <input type="text" id="alamat" name="alamat" required>
+            </div>
+            <div class="form-group">
+                <label for="nomorTelepon">Phone Number:</label>
+                <input type="tel" id="nomorTelepon" name="nomorTelepon" required>
+            </div>
+            <div class="form-group">
+                <button type="submit"  value="Register">Register</button>
+            </div>
+            <div class="form-group">
+                <p class="error-message" id="error-message"></p>
+            </div>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#registration-form').submit(function(e) {
+            e.preventDefault();
+
+            // Mengambil data dari form
+            var formData = {
+            	username: $('#username').val(),
+            	namaLengkap: $('#namaLengkap').val(),
+            	email: $('#email').val(),
+            	password: $('#password').val(),
+            	peran: $('#peran').val(),
+            	alamat: $('#alamat').val(),
+            	nomorTelepon: $('#nomorTelepon').val()
+                
+            };
+            var jsonData = JSON.stringify(formData);
+
+            // Kirim permintaan POST menggunakan Ajax
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/users/register',
+                data: jsonData,
+                contentType: 'application/json',
+                success: function(response) {
+                    // Tanggapan dari server di sini (mungkin redirect atau tindakan lainnya)
+                   	alert(response);
+                   	console.log(response);
+                   	
+                 // Redirect ke halaman login
+                    window.location.href = 'http://localhost:8080/login';
+                },
+                error: function(error) {
+                    // Tanggapan jika terjadi kesalahan
+                    alert("error");
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

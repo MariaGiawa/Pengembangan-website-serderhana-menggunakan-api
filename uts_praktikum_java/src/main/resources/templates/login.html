@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #6e7d9d, #2a2c39);
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h2 {
+            font-size: 32px;
+        }
+
+        form {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 6px 0;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            color: #fff;
+        }
+
+        button {
+            background: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <form id="registration-form">
+        <h2>Login</h2>
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <div>
+            <button type="submit">Login</button>
+        </div>
+    </form>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        $('#registration-form').submit(function(e) {
+            e.preventDefault();
+
+            // Mengambil data dari form
+            var formData = {
+            	username: $('#username').val(),
+            	password: $('#password').val()
+                
+            };
+            var jsonData = JSON.stringify(formData);
+
+            // Kirim permintaan POST menggunakan Ajax
+            $.ajax({
+                type: 'POST',
+                url: 'http://localhost:8080/users/login',
+                data: jsonData,
+                contentType: 'application/json',
+                success: function(response) {
+                    // Tanggapan dari server di sini (mungkin redirect atau tindakan lainnya)
+                   	alert(response);
+                   	console.log(response);
+                   	
+                 // Redirect ke halaman login
+                    window.location.href = 'http://localhost:8080/tempatwisata-page';
+                },
+                error: function(error) {
+                    // Tanggapan jika terjadi kesalahan
+                    alert("error");
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>

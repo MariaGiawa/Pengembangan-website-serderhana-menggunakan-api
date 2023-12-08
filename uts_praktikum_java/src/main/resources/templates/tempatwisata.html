@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daftar Tempat Wisata</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Daftar Tempat Wisata</a>
+        <ul class="navbar-nav ml-auto">
+	    <li class="nav-item">
+	        <a class="nav-link" href="/login">Logout</a>
+	    </li>
+</ul>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Tempat Wisata</h4>
+                    </div>
+                    <div class="input-group mb-3">
+		                <input type="text" id="searchInput" class="form-control" placeholder="Cari Tempat Wisata">
+		                <div class="input-group-append">
+		                    <button class="btn btn-primary" onclick="searchTempatWisata()">Cari</button>
+		                </div>
+           			</div>
+                    <div class="card-body" style="overflow-x: scroll;">
+                        <table class="table table-bordered" id="tempatWisataTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Nama Tempat</th>
+                                    <th>Harga Tiket</th>
+                                    <th>Jam Operasional</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Tambah Tempat Wisata</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="tempatWisataForm">
+                            <div class="form-group">
+                                <label for="namaTempat">Nama Tempat:</label>
+                                <input type="text" class="form-control" id="namaTempat" name="namaTempat">
+                            </div>
+                            <div class="form-group">
+                                <label for="hargaTiket">Harga Tiket:</label>
+                                <input type="text" class="form-control" id="hargaTiket" name="hargaTiket">
+                            </div>
+                            <div class="form-group">
+                                <label for="jamOperasional">Jam Operasional:</label>
+                                <input type="text" class="form-control" id="jamOperasional" name="jamOperasional">
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="submit-button">Simpan Tempat Wisata</button>
+                            <button type="button" class="btn btn-secondary" id="cancelTempatWisataBtn">Batal</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div class="modal" id="editModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Tempat Wisata</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editId" name="editId">
+                        <div class="form-group">
+                            <label for="editNamaTempat">Nama Tempat:</label>
+                            <input type="text" class="form-control" id="editNamaTempat" name="editNamaTempat">
+                        </div>
+                        <div class="form-group">
+                            <label for="editHargaTiket">Harga Tiket:</label>
+                            <input type="text" class="form-control" id="editHargaTiket" name="editHargaTiket">
+                        </div>
+                        <div class="form-group">
+                            <label for="editJamOperasional">Jam Operasional:</label>
+                            <input type="text" class="form-control" id="editJamOperasional" name="editJamOperasional">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveChangesButton">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memuat jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Memuat Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Memuat Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Fungsi untuk mendapatkan data Tempat Wisata
+    function getTempatWisata() {
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/', // Ganti dengan URL yang sesuai
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var tempatWisataTable = $('#tempatWisataTable tbody');
+                tempatWisataTable.empty();
+                data.forEach(function(tempatWisata, index) {
+                    var row = '<tr>' +
+                        '<th scope="row">' + (index + 1) + '</th>' +
+                        '<td>' + tempatWisata.namaTempat + '</td>' +
+                        '<td>' + tempatWisata.hargaTiket + '</td>' +
+                        '<td>' + tempatWisata.jamOperasional + '</td>' +
+                        '<td>' +
+                        '<button class="btn btn-primary edit-button" data-id="' + tempatWisata.idTempatWisata + '">Edit</button> ' +
+                        '<button class="btn btn-danger delete-button" data-id="' + tempatWisata.idTempatWisata + '">Delete</button>' +
+                        '</td>' +
+                        '</tr>';
+                    tempatWisataTable.append(row);
+                });
+
+                // Tambahkan event listeners untuk tombol Edit dan Delete
+                $('.edit-button').click(function() {
+                    var id = $(this).data('id');
+                    showEditTempatWisataModal(id);
+                });
+
+                $('.delete-button').click(function() {
+                    var id = $(this).data('id');
+                    showDeleteTempatWisataConfirmation(id);
+                });
+            },
+            error: function() {
+                alert('Gagal mengambil data Tempat Wisata.');
+            }
+        });
+    }
+
+    // Saat halaman dimuat, tampilkan data Tempat Wisata
+    $(document).ready(function() {
+        getTempatWisata();
+    });
+
+    // Tangani pengiriman form Tempat Wisata
+    $('#tempatWisataForm').submit(function(e) {
+        e.preventDefault();
+        var formData = {
+            namaTempat: $('#namaTempat').val(),
+            hargaTiket: $('#hargaTiket').val(),
+            jamOperasional: $('#jamOperasional').val()
+        };
+
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/', // Ganti dengan URL yang sesuai
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(data) {
+                getTempatWisata(); // Refresh tabel setelah menambahkan data
+                $('#tempatWisataForm')[0].reset(); // Bersihkan formulir
+            },
+            error: function() {
+                alert('Gagal menambahkan data Tempat Wisata.');
+            }
+        });
+    });
+
+    // Fungsi untuk menampilkan modal Edit
+    function showEditTempatWisataModal(id) {
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/' + id, // Ganti dengan URL yang sesuai
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                $('#editId').val(data.idTempatWisata);
+                $('#editNamaTempat').val(data.namaTempat);
+                $('#editHargaTiket').val(data.hargaTiket);
+                $('#editJamOperasional').val(data.jamOperasional);
+                $('#editModal').modal('show');
+            },
+            error: function() {
+                alert('Gagal mengambil data Tempat Wisata untuk diedit.');
+            }
+        });
+    }
+
+    // Fungsi untuk menghapus Tempat Wisata
+    function deleteTempatWisata(id) {
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/' + id, // Ganti dengan URL yang sesuai
+            type: 'DELETE',
+            success: function() {
+                getTempatWisata(); // Refresh tabel setelah menghapus data
+            },
+            error: function() {
+                alert('Gagal menghapus data Tempat Wisata.');
+            }
+        });
+    }
+
+    // Fungsi untuk menampilkan konfirmasi penghapusan
+    function showDeleteTempatWisataConfirmation(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus item ini?')) {
+            deleteTempatWisata(id);
+        }
+    }
+
+    // Fungsi untuk menyimpan perubahan data
+    $('#saveChangesButton').click(function() {
+        var id = $('#editId').val();
+        var namaTempat = $('#editNamaTempat').val();
+        var hargaTiket = $('#editHargaTiket').val();
+        var jamOperasional = $('#editJamOperasional').val();
+
+        var updatedData = {
+            namaTempat: namaTempat,
+            hargaTiket: hargaTiket,
+            jamOperasional: jamOperasional
+        };
+
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/' + id, // Ganti dengan URL yang sesuai
+            type: 'PUT',
+            data: JSON.stringify(updatedData),
+            contentType: 'application/json',
+            success: function() {
+                getTempatWisata(); // Refresh tabel setelah mengubah data
+                $('#editModal').modal('hide'); // Tutup modal Edit
+            },
+            error: function() {
+                alert('Gagal menyimpan perubahan.');
+            }
+        });
+    });
+ // Fungsi untuk melakukan pencarian dengan AJAX
+    function searchTempatWisata() {
+    var searchKeyword = document.getElementById("searchInput").value;
+
+    // Membuat URL lengkap dengan parameter pencarian
+    var searchURL = "http://localhost:8080/tempatwisata/search/" + searchKeyword;
+
+    $.ajax({
+        type: "GET",
+        url: searchURL, // Menggunakan URL yang sudah dibentuk
+        success: function(data) {
+            displayResults(data);
+        },
+        error: function() {
+            displayResults([]);
+        }
+    });
+}
+
+    // Fungsi untuk menampilkan hasil pencarian
+    function displayResults(results) {
+    var tempatWisataTable = $('#tempatWisataTable tbody');
+    tempatWisataTable.empty();
+
+    if (results.length === 0) {
+        tempatWisataTable.append("<tr><td colspan='5'>Tidak ada hasil ditemukan.</td></tr>");
+    } else {
+        results.forEach(function(tempatWisata, index) {
+            var row = '<tr>' +
+                '<th scope="row">' + (index + 1) + '</th>' +
+                '<td>' + tempatWisata.namaTempat + '</td>' +
+                '<td>' + tempatWisata.hargaTiket + '</td>' +
+                '<td>' + tempatWisata.jamOperasional + '</td>' +
+                '<td>' +
+                '<button class="btn btn-primary edit-button" data-id="' + tempatWisata.idTempatWisata + '">Edit</button> ' +
+                '<button class="btn btn-danger delete-button" data-id="' + tempatWisata.idTempatWisata + '">Delete</button>' +
+                '</td>' +
+                '</tr>';
+            tempatWisataTable.append(row);
+        });
+    }
+}
+
+    
+</script>
+
+
+</body>
+</html>

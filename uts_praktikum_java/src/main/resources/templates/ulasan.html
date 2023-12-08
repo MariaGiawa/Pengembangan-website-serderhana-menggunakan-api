@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daftar Ulasan Tempat Wisata</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class a ="navbar-brand" href="#">Daftar Ulasan Tempat Wisata</a>
+          <ul class="navbar-nav ml-auto">
+	    <li class="nav-item">
+	        <a class="nav-link" href="/login">Logout</a>
+	    </li>
+		</ul>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Ulasan Tempat Wisata</h4>
+                    </div>
+                    <div class="input-group mb-3">
+		                <input type="text" id="searchInput" class="form-control" placeholder="Cari Ulasan">
+		                <div class="input-group-append">
+		                    <button class="btn btn-primary" onclick="searchUlasan()">Cari</button>
+		                </div>
+           			</div>
+                    <div class="card-body" style="overflow-x: scroll;">
+                        <table class="table table-bordered" id="ulasanTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Tempat Wisata</th>
+                                    <th>Ulasan</th>
+                                    <th>Tanggal Ulasan</th> <!-- Tambah kolom "Tanggal Ulasan" -->
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>Tambah Ulasan</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="ulasanForm">
+                            <div class="form-group">
+                                <label for="tempatWisata">Tempat Wisata:</label>
+                                <select class="form-control" id="tempatWisata" name="tempatWisata">
+                                    <!-- Placeholder option -->
+                                    <option value="">Pilih Tempat Wisata</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ulasan">Ulasan:</label>
+                                <textarea class="form-control" id="ulasan" name="ulasan" rows="4"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="tanggalUlasan">Tanggal Ulasan:</label>
+                                <input type="date" class="form-control" id="tanggalUlasan" name="tanggalUlasan">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Simpan Ulasan</button>
+                            <button type="button" class="btn btn-secondary" id="cancelUlasanBtn">Batal</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div class="modal" id="editUlasanModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Ulasan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUlasanForm">
+                        <input type="hidden" id="editUlasanId" name="editUlasanId">
+                        <div class="form-group">
+                            <label for="editUlasanTempat">Tempat Wisata:</label>
+                            <select class="form-control" id="editUlasanTempat" name="editUlasanTempat">
+                                <!-- Placeholder option -->
+                                <option value="">Pilih Tempat Wisata</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editUlasanText">Ulasan:</label>
+                            <textarea class="form-control" id="editUlasanText" name="editUlasanText" rows="4"></textarea>
+                        </div>
+                       <div class="form-group">
+						    <label for="editTanggalUlasan">Tanggal Ulasan:</label>
+						    <input type="date" class="form-control" id="editTanggalUlasan" name="editTanggalUlasan">
+						</div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveUlasanChangesBtn">Simpan Perubahan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   <!-- Memuat jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+
+<!-- Memuat Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+<!-- Memuat Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    function populateTempatWisataDropdown() {
+        $.ajax({
+            url: 'http://localhost:8080/tempatwisata/', // Ganti dengan URL yang sesuai
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var tempatWisataDropdown = $('#tempatWisata');
+                var editTempatWisataDropdown = $('#editUlasanTempat');
+
+                // Clear existing options
+                tempatWisataDropdown.empty();
+                editTempatWisataDropdown.empty();
+
+                // Add a placeholder option
+                tempatWisataDropdown.append('<option value="">Pilih Tempat Wisata</option>');
+                editTempatWisataDropdown.append('<option value="">Pilih Tempat Wisata</option>');
+
+                // Populate the dropdown with Tempat Wisata data
+                data.forEach(function(tempatWisata) {
+                    tempatWisataDropdown.append('<option value="' + tempatWisata.idTempatWisata + '">' + tempatWisata.idTempatWisata + '</option>');
+                    editTempatWisataDropdown.append('<option value="' + tempatWisata.idTempatWisata + '">' + tempatWisata.idTempatWisata + '</option>');
+                });
+            },
+            error: function() {
+                alert('Gagal mengambil data Tempat Wisata.');
+            }
+        });
+    }
+
+    // Function to get ulasan
+    function getUlasan() {
+        $.ajax({
+            url: 'http://localhost:8080/ulasans/', // Ganti dengan URL yang sesuai
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                var ulasanTable = $('#ulasanTable tbody');
+                ulasanTable.empty();
+                data.forEach(function(ulasan, index) {
+                    var row = '<tr>' +
+                        '<th scope="row">' + (index + 1) + '</th>' +
+                        '<td>' + ulasan.tempatWisata + '</td>' +
+                        '<td>' + ulasan.ulasan + '</td>' + 
+                        '<td>' + ulasan.tanggalUlasan + '</td>' + 
+                        '<td>' +
+                        '<button class="btn btn-primary edit-ulasan-button" data-id="' + ulasan.idUlasan + '">Edit</button> ' +
+                        '<button class="btn btn-danger delete-ulasan-button" data-id="' + ulasan.idUlasan + '">Delete</button>' +
+                        '</td>' +
+                        '</tr>';
+                    ulasanTable.append(row);
+                });
+
+                // Add event listeners for edit and delete buttons
+                $('.edit-ulasan-button').click(function() {
+                    var id = $(this).data('id');
+                    showEditUlasanModal(id);
+                });
+
+                $('.delete-ulasan-button').click(function() {
+                    var id = $(this).data('id');
+                    showDeleteUlasanConfirmation(id);
+                });
+            },
+            error: function() {
+                alert('Gagal mengambil data Ulasan Tempat Wisata.');
+            }
+        });
+    }
+
+    // When the page is loaded, populate the Tempat Wisata dropdown and display the ulasan
+    $(document).ready(function() {
+        populateTempatWisataDropdown();
+        getUlasan();
+    });
+
+ // Handle ulasan form submission
+    $('#ulasanForm').submit(function(e) {
+        e.preventDefault();
+        var formData = {
+            tempatWisata: $('#tempatWisata').val(),
+            ulasan: $('#ulasan').val(),
+            tanggalUlasan: $('#tanggalUlasan').val() // Tambahkan tanggal ulasan ke objek data
+        };
+
+        $.ajax({
+            url: 'http://localhost:8080/ulasans/', // Ganti dengan URL yang sesuai
+            type: 'POST',
+            data: JSON.stringify(formData),
+            contentType: 'application/json',
+            success: function(data) {
+                getUlasan(); // Refresh tabel setelah menambahkan ulasan
+                $('#ulasanForm')[0].reset(); // Bersihkan formulir
+            },
+            error: function() {
+                alert('Gagal menambahkan Ulasan Tempat Wisata.');
+            }
+        });
+    });
+    
+
+    // Function to show edit ulasan modal
+    function showEditUlasanModal(id) {
+        $.ajax({
+            url: 'http://localhost:8080/ulasans/' + id, // Ganti dengan URL yang sesuai
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                $('#editUlasanId').val(data.idUlasan);
+                $('#editUlasanTempat').val(data.tempatWisata);
+                $('#editUlasanText').val(data.ulasan);
+                $('#editTanggalUlasan').val(data.tanggalUlasan);
+                $('#editUlasanModal').modal('show');
+            },
+            error: function() {
+                alert('Gagal mengambil data Ulasan Tempat Wisata untuk diedit.');
+            }
+        });
+    }
+
+    // Function to delete ulasan
+    function deleteUlasan(id) {
+        $.ajax({
+            url: 'http://localhost:8080/ulasans/' + id, // Ganti dengan URL yang sesuai
+            type: 'DELETE',
+            success: function() {
+                getUlasan(); // Refresh tabel setelah menghapus ulasan
+            },
+            error: function() {
+                alert('Gagal menghapus Ulasan Tempat Wisata.');
+            }
+        });
+    }
+
+    // Function to show delete confirmation
+    function showDeleteUlasanConfirmation(id) {
+        if (confirm('Apakah Anda yakin ingin menghapus ulasan ini?')) {
+            deleteUlasan(id);
+        }
+    }
+
+ // Function to save ulasan changes
+    $('#saveUlasanChangesBtn').click(function() {
+        var id = $('#editUlasanId').val();
+        var tempatWisata = $('#editUlasanTempat').val();
+        var ulasanText = $('#editUlasanText').val();
+        var tanggalUlasan = $('#editTanggalUlasan').val(); // Perbarui id
+
+        var updatedData = {
+            tempatWisata: tempatWisata,
+            ulasan: ulasanText,
+            tanggalUlasan: tanggalUlasan // Perbarui id
+        };
+
+        $.ajax({
+            url: 'http://localhost:8080/ulasans/' + id, // Ganti dengan URL yang sesuai
+            type: 'PUT',
+            data: JSON.stringify(updatedData),
+            contentType: 'application/json',
+            success: function() {
+                getUlasan(); // Refresh tabel setelah mengubah ulasan
+                $('#editUlasanModal').modal('hide'); // Tutup modal edit ulasan
+            },
+            error: function() {
+                alert('Gagal menyimpan perubahan.');
+            }
+        });
+    });
+ // Fungsi untuk melakukan pencarian dengan AJAX
+   function searchUlasan() {
+    var searchKeyword = document.getElementById("searchInput").value;
+
+    $.ajax({
+        type: "GET",
+        url: "http://localhost:8080/ulasans/search?ulasan=" + searchKeyword,
+        success: function(data) {
+            displayResults(data);
+        },
+        error: function() {
+            displayResults([]);
+        }
+    });
+}
+
+
+    // Fungsi untuk menampilkan hasil pencarian
+    function displayResults(results) {
+        var ulasanTable = $('#ulasanTable tbody');
+        ulasanTable.empty();
+
+        if (results.length === 0) {
+            ulasanTable.append("<tr><td colspan='5'>Tidak ada hasil ditemukan.</td></tr>");
+        } else {
+            results.forEach(function(ulasan, index) {
+                var row = '<tr>' +
+                    '<th scope="row">' + (index + 1) + '</th>' +
+                    '<td>' + ulasan.tempatWisata + '</td>' +
+                    '<td>' + ulasan.ulasan + '</td>' +
+                    '<td>' + ulasan.tanggalUlasan + '</td>' +
+                    '<td>' +
+                    '<button class="btn btn-primary edit-ulasan-button" data-id="' + ulasan.idUlasan + '">Edit</button> ' +
+                    '<button class="btn btn-danger delete-ulasan-button" data-id="' + ulasan.idUlasan + '">Delete</button>' +
+                    '</td>' +
+                    '</tr>';
+                ulasanTable.append(row);
+            });
+        }
+    }
+
+</script>
+
+</body>
+</html>
